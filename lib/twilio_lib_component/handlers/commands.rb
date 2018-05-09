@@ -19,14 +19,11 @@ module TwilioLibComponent
       category :twilio_lib
 
       handle SmsFetch do |sms_fetch|
-        fetch_id = sms_fetch.fetch_id
-
-        time = clock.iso8601
+        request_id = sms_fetch.request_id
 
         sms_fetch_initiate = SmsFetchInitiate.follow(sms_fetch)
-        sms_fetch_initiate.start_time = time
 
-        stream_name = stream_name(fetch_id, 'twilioLibRest:command')
+        stream_name = stream_name(request_id, 'twilioLibRest:command')
 
         Try.(MessageStore::ExpectedVersion::Error) do
           write.initial(sms_fetch_initiate, stream_name)

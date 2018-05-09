@@ -2,8 +2,13 @@ require 'eventide/postgres'
 require 'consumer/postgres'
 require 'try'
 require 'twilio-ruby'
+require 'ruby-boolean'
 
 require 'twilio_lib_component/load'
+
+require 'twilio_lib_component/request'
+require 'twilio_lib_component/projection'
+require 'twilio_lib_component/store'
 
 require 'twilio_lib_component/utils/twilio_client'
 

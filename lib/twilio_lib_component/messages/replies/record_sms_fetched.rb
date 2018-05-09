@@ -1,7 +1,7 @@
 module TwilioLibComponent
   module Messages
-    module Events
-      class SmsFetched
+    module Replies
+      class RecordSmsFetched
         include Messaging::Message
 
         attribute :request_id, String
@@ -10,8 +10,8 @@ module TwilioLibComponent
         attribute :from, String
         attribute :to, String
         attribute :body, String
+        attribute :start_time, String
         attribute :processed_time, String
-        attribute :meta_position, Integer
       end
     end
   end

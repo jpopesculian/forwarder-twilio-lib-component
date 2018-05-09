@@ -4,12 +4,12 @@ module TwilioLibComponent
       class SmsFetchRejected
         include Messaging::Message
 
-        attribute :fetch_id, String
+        attribute :request_id, String
         attribute :message_sid, String
         attribute :time, String
         attribute :error_message, String
-        attribute :start_time, String
         attribute :processed_time, String
+        attribute :meta_position, Integer
       end
     end
   end

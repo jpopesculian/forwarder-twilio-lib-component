@@ -11,43 +11,33 @@ module TwilioLibComponent
 
         dependency :write, Messaging::Postgres::Write
         dependency :clock, Clock::UTC
-        dependency :twilio_client, TwilioLibComponent::Utils::TwilioClient
+        dependency :store, Store
 
         def configure
           Messaging::Postgres::Write.configure(self)
           Clock::UTC.configure(self)
-          TwilioLibComponent::Utils::TwilioClient.configure(self)
+          Store.configure(self)
         end
 
         category :twilio_lib
 
         handle SmsFetchInitiate do |sms_fetch_initiate|
-          fetch_id = sms_fetch_initiate.fetch_id
-          message_sid = sms_fetch_initiate.message_sid
+          request_id = sms_fetch_initiate.request_id
 
-          stream_name = stream_name(fetch_id, 'twilioLib')
+          request = store.fetch(request_id)
 
-          begin
-            message = twilio_client.get_message(message_sid)
-
-            time = clock.iso8601
-
-            sms_fetched = SmsFetched.follow(sms_fetch_initiate)
-            sms_fetched.to = message.to
-            sms_fetched.from = message.from
-            sms_fetched.body = message.body
-            sms_fetched.processed_time = time
-
-            write.(sms_fetched, stream_name)
-          rescue Twilio::REST::TwilioError => error
-            time = clock.iso8601
-
-            sms_fetch_rejected = SmsFetchRejected.follow(sms_fetch_initiate)
-            sms_fetch_rejected.error_message = error.message
-            sms_fetch_rejected.processed_time = time
-
-            write.(sms_fetch_rejected, stream_name)
+          if request.started?
+            logger.info(tag: :ignored) { "Command ignored (Command: #{sms_fetch_initiate.message_type}, Request ID: #{request_id}, Message SID: #{sms_fetch_initiate.message_sid}" }
+            return
           end
+
+          stream_name = stream_name(request_id, 'twilioLib')
+
+          time = clock.iso8601
+
+          sms_fetch_initiated = SmsFetchInitiated.follow(sms_fetch_initiate)
+          sms_fetch_initiated.processed_time = time
+          write.(sms_fetch_initiated, stream_name)
         end
       end
     end

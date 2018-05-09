@@ -1,17 +1,15 @@
 module TwilioLibComponent
   module Messages
-    module Events
-      class SmsFetched
+    module Replies
+      class RecordSmsFetchRejected
         include Messaging::Message
 
         attribute :request_id, String
         attribute :message_sid, String
         attribute :time, String
-        attribute :from, String
-        attribute :to, String
-        attribute :body, String
+        attribute :error_message, String
+        attribute :start_time, String
         attribute :processed_time, String
-        attribute :meta_position, Integer
       end
     end
   end
