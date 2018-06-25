@@ -39,6 +39,25 @@ module TwilioLibComponent
           sms_fetch_initiated.processed_time = time
           write.(sms_fetch_initiated, stream_name)
         end
+
+        handle SmsSendInitiate do |sms_send_initiate|
+          request_id = sms_send_initiate.request_id
+
+          request = store.fetch(request_id)
+
+          if request.started?
+            logger.info(tag: :ignored) { "Command ignored (Command: #{sms_send_initiate.message_type}, Request ID: #{request_id}, Message SID: #{sms_send_initiate.message_sid}" }
+            return
+          end
+
+          stream_name = stream_name(request_id, 'twilioLib')
+
+          time = clock.iso8601
+
+          sms_send_initiated = SmsSendInitiated.follow(sms_send_initiate)
+          sms_send_initiated.processed_time = time
+          write.(sms_send_initiated, stream_name)
+        end
       end
     end
   end

@@ -28,5 +28,27 @@ module TwilioLibComponent
       request.twilio_id = sms_fetch_initiated.message_sid
       request.start_time = Time.parse(sms_fetch_initiated.processed_time)
     end
+
+    apply SmsSent do |sms_sent|
+      request.id = sms_sent.request_id
+      request.twilio_id = sms_sent.message_sid
+      request.to = sms_sent.to
+      request.from = sms_sent.from
+      request.body = sms_sent.body
+      request.finish_time = Time.parse(sms_sent.processed_time)
+      request.meta_position = sms_sent.meta_position
+    end
+
+    apply SmsSendRejected do |sms_send_rejected|
+      request.id = sms_send_rejected.request_id
+      request.error = sms_send_rejected.error_message
+      request.finish_time = Time.parse(sms_send_rejected.processed_time)
+      request.meta_position = sms_send_rejected.meta_position
+    end
+
+    apply SmsSendInitiated do |sms_send_initiated|
+      request.id = sms_send_initiated.request_id
+      request.start_time = Time.parse(sms_send_initiated.processed_time)
+    end
   end
 end

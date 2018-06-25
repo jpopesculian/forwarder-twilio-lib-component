@@ -29,6 +29,18 @@ module TwilioLibComponent
           write.initial(sms_fetch_initiate, stream_name)
         end
       end
+
+      handle SmsSend do |sms_send|
+        request_id = sms_send.request_id
+
+        sms_send_initiate = SmsSendInitiate.follow(sms_send)
+
+        stream_name = stream_name(request_id, 'twilioLibRest:command')
+
+        Try.(MessageStore::ExpectedVersion::Error) do
+          write.initial(sms_send_initiate, stream_name)
+        end
+      end
     end
   end
 end

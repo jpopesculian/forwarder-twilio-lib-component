@@ -10,8 +10,6 @@ module TwilioLibComponent
       end
 
       def self.call(message_sid:, request_id: nil, time: nil, reply_stream_name: nil, previous_message: nil)
-        request_id ||= Identifier::UUID::Random.get
-        time ||= Clock::UTC.iso8601
         instance = self.build
         instance.(
           request_id: request_id,
@@ -22,7 +20,10 @@ module TwilioLibComponent
         )
       end
 
-      def call(request_id:, message_sid:, time:, reply_stream_name: nil, previous_message: nil)
+      def call(message_sid:, request_id: nil, time: nil, reply_stream_name: nil, previous_message: nil)
+        request_id ||= Identifier::UUID::Random.get
+        time ||= Clock::UTC.iso8601
+
         sms_fetch = self.class.build_message(Messages::Commands::SmsFetch, previous_message)
 
         sms_fetch.request_id = request_id

@@ -29,7 +29,7 @@ module TwilioLibComponent
 
         request = store.fetch(request_id)
         if request.finished?
-          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_fetch_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_fetch_initiate.message_sid}" }
+          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_fetch_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_fetch_initiate.request_id}" }
           return
         end
 
@@ -58,9 +58,54 @@ module TwilioLibComponent
           sms_fetch_rejected = SmsFetchRejected.follow(sms_fetch_initiated)
           sms_fetch_rejected.error_message = error.message
           sms_fetch_rejected.processed_time = time
-          sms_fetched.meta_position = position
+          sms_fetch_rejected.meta_position = position
 
           write.(sms_fetch_rejected, stream_name)
+        end
+      end
+
+      handle SmsSendInitiated do |sms_send_initiated|
+        request_id = sms_send_initiated.request_id
+        position = sms_send_initiated.metadata.global_position
+
+        request = store.fetch(request_id)
+        if request.finished?
+          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_send_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_send_initiate.request_id}" }
+          return
+        end
+
+        if request.current?(position)
+          logger.info(tag: :ignored) { "Command ignored (Command: #{sms_send_initiated.message_type}, Request ID: #{request_id}, Position: #{request.meta_position} -> #{position}" }
+        end
+
+        stream_name = stream_name(request_id, 'twilioLib')
+
+        begin
+          message = twilio_client.send_message(
+            to: sms_send_initiated.to,
+            from: sms_send_initiated.from,
+            body: sms_send_initiated.body
+          )
+
+          time = clock.iso8601
+
+          sms_sent = SmsSent.follow(sms_send_initiated)
+          sms_sent.to = message.to
+          sms_sent.from = message.from
+          sms_sent.body = message.body
+          sms_sent.processed_time = time
+          sms_sent.meta_position = position
+
+          write.(sms_sent, stream_name)
+        rescue Twilio::REST::TwilioError => error
+          time = clock.iso8601
+
+          sms_send_rejected = SmsSendRejected.follow(sms_send_initiated)
+          sms_send_rejected.error_message = error.message
+          sms_send_rejected.processed_time = time
+          sms_send_rejected.meta_position = position
+
+          write.(sms_send_rejected, stream_name)
         end
       end
 
@@ -82,6 +127,26 @@ module TwilioLibComponent
         ])
 
         write.reply(record_sms_fetch_rejected)
+      end
+
+      handle SmsSent do |sms_sent|
+        return unless sms_sent.metadata.reply?
+
+        record_sms_sent = RecordSmsSent.follow(sms_sent, exclude: [
+          :meta_position
+        ])
+
+        write.reply(record_sms_sent)
+      end
+
+      handle SmsSendRejected do |sms_send_rejected|
+        return unless sms_send_rejected.metadata.reply?
+
+        record_sms_send_rejected = RecordSmsSendRejected.follow(sms_send_rejected, exclude: [
+          :meta_position
+        ])
+
+        write.reply(record_sms_send_rejected)
       end
     end
   end

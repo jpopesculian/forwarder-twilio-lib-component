@@ -25,6 +25,15 @@ module TwilioLibComponent
         client.messages(message_sid).fetch
       end
 
+      def send_message(to:, from:, body:)
+        logger.info(tag: :twilio_client) { "Sending Message To: #{to}, From: #{from}, Body: #{body}" }
+        client.messages.create(
+          to: to,
+          from: from,
+          body: body
+        )
+      end
+
       private
 
       attr_reader :client
