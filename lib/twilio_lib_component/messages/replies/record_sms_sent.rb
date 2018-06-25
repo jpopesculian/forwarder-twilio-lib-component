@@ -1,7 +1,7 @@
 module TwilioLibComponent
   module Messages
     module Replies
-      class RecordSmSent
+      class RecordSmsSent
         include Messaging::Message
 
         attribute :request_id, String
