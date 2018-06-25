@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
 
   s.authors = ['The Eventide Project']
   s.email = 'opensource@eventide-project.org'
-  s.homepage = 'https://github.com/eventide-examples/twilio-lib-component'
+  s.homepage = 'https://github.com/jpopesculian/twilio-lib-component'
   s.licenses = ['MIT']
 
   s.require_paths = ['lib']
