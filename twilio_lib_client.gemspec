@@ -45,6 +45,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'evt-messaging-postgres'
   s.add_runtime_dependency 'evt-configure'
+  s.add_runtime_dependency 'evt-chainable_message'
 
   s.add_development_dependency 'test_bench'
 end
