@@ -29,7 +29,7 @@ module TwilioLibComponent
 
         request = store.fetch(request_id)
         if request.finished?
-          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_fetch_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_fetch_initiate.request_id}" }
+          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_fetch_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_fetch_initiated.request_id}" }
           return
         end
 
@@ -70,7 +70,7 @@ module TwilioLibComponent
 
         request = store.fetch(request_id)
         if request.finished?
-          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_send_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_send_initiate.request_id}" }
+          logger.info(tag: :ignored) { "Event ignored (Event: #{sms_send_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_send_initiated.request_id}" }
           return
         end
 
@@ -90,6 +90,7 @@ module TwilioLibComponent
           time = clock.iso8601
 
           sms_sent = SmsSent.follow(sms_send_initiated)
+          sms_sent.message_sid = message.sid
           sms_sent.to = message.to
           sms_sent.from = message.from
           sms_sent.body = message.body
