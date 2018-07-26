@@ -10,6 +10,8 @@ module TwilioLibComponent
         attribute :from, String
         attribute :to, String
         attribute :body, String
+        attribute :direction, String
+        attribute :status, String
         attribute :processed_time, String
         attribute :meta_position, Integer
       end

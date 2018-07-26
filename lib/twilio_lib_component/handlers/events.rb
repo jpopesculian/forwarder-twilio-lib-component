@@ -48,6 +48,9 @@ module TwilioLibComponent
           sms_fetched.to = message.to
           sms_fetched.from = message.from
           sms_fetched.body = message.body
+          sms_fetched.time = message.date_sent.iso8601
+          sms_fetched.direction = message.direction
+          sms_fetched.status = message.status
           sms_fetched.processed_time = time
           sms_fetched.meta_position = position
 
