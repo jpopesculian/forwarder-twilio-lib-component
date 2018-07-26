@@ -12,6 +12,7 @@ module TwilioLibComponent
         attribute :body, String
         attribute :processed_time, String
         attribute :meta_position, Integer
+        attribute :status_callback, String
       end
     end
   end

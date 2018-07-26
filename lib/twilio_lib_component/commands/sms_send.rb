@@ -9,7 +9,7 @@ module TwilioLibComponent
         receiver.public_send("#{attr_name}=", instance)
       end
 
-      def self.call(to:, from:, body:, request_id: nil, time: nil, reply_stream_name: nil, previous_message: nil)
+      def self.call(to:, from:, body:, status_callback: nil, request_id: nil, time: nil, reply_stream_name: nil, previous_message: nil)
         instance = self.build
         instance.(
           to: to,
@@ -17,12 +17,13 @@ module TwilioLibComponent
           body: body,
           request_id: request_id,
           time: time,
+          status_callback: status_callback,
           reply_stream_name: reply_stream_name,
           previous_message: previous_message
         )
       end
 
-      def call(to:, from:, body:, request_id: nil, time: nil, reply_stream_name: nil, previous_message: nil)
+      def call(to:, from:, body:, status_callback: nil, request_id: nil, time: nil, reply_stream_name: nil, previous_message: nil)
         request_id ||= Identifier::UUID::Random.get
         time ||= Clock::UTC.iso8601
 
@@ -33,6 +34,7 @@ module TwilioLibComponent
         sms_send.to = to
         sms_send.from = from
         sms_send.body = body
+        sms_send.status_callback = status_callback
 
         stream_name = command_stream_name(request_id)
 

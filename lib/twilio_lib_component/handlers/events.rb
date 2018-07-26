@@ -84,7 +84,8 @@ module TwilioLibComponent
           message = twilio_client.send_message(
             to: sms_send_initiated.to,
             from: sms_send_initiated.from,
-            body: sms_send_initiated.body
+            body: sms_send_initiated.body,
+            status_callback: sms_send_initiated.status_callback
           )
 
           time = clock.iso8601

@@ -10,6 +10,7 @@ module TwilioLibComponent
         attribute :from, String
         attribute :body, String
         attribute :processed_time, String
+        attribute :status_callback, String
       end
     end
   end
