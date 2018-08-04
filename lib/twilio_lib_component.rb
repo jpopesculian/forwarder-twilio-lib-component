@@ -12,6 +12,8 @@ require 'twilio_lib_component/projection'
 require 'twilio_lib_component/store'
 
 require 'twilio_lib_component/utils/twilio_client'
+require 'twilio_lib_component/utils/processed'
+require 'twilio_lib_component/utils/finished'
 
 require 'twilio_lib_component/handlers/commands'
 require 'twilio_lib_component/handlers/commands/rest'

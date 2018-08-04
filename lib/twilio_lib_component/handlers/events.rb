@@ -12,12 +12,16 @@ module TwilioLibComponent
       dependency :clock, Clock::UTC
       dependency :twilio_client, TwilioLibComponent::Utils::TwilioClient
       dependency :store, Store
+      dependency :processed, Utils::Processed
+      dependency :finished, Utils::Finished
 
       def configure
         Messaging::Postgres::Write.configure(self)
         Clock::UTC.configure(self)
         TwilioLibComponent::Utils::TwilioClient.configure(self)
         Store.configure(self)
+        Utils::Processed.configure(self)
+        Utils::Finished.configure(self)
       end
 
       category :twilio_lib
@@ -27,14 +31,13 @@ module TwilioLibComponent
         message_sid = sms_fetch_initiated.message_sid
         position = sms_fetch_initiated.metadata.global_position
 
+        current, ignored = processed.(sms_fetch_initiated)
+        return ignored.() if current
+
         request = store.fetch(request_id)
         if request.finished?
           logger.info(tag: :ignored) { "Event ignored (Event: #{sms_fetch_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_fetch_initiated.request_id}" }
           return
-        end
-
-        if request.current?(position)
-          logger.info(tag: :ignored) { "Command ignored (Command: #{sms_fetch_initiated.message_type}, Request ID: #{request_id}, Position: #{request.meta_position} -> #{position}" }
         end
 
         stream_name = stream_name(request_id, 'twilioLib')
@@ -71,14 +74,13 @@ module TwilioLibComponent
         request_id = sms_send_initiated.request_id
         position = sms_send_initiated.metadata.global_position
 
+        current, ignored = processed.(sms_send_initiated)
+        return ignored.() if current
+
         request = store.fetch(request_id)
         if request.finished?
           logger.info(tag: :ignored) { "Event ignored (Event: #{sms_send_initiated.message_type}, Request ID: #{request_id}, Message SID: #{sms_send_initiated.request_id}" }
           return
-        end
-
-        if request.current?(position)
-          logger.info(tag: :ignored) { "Command ignored (Command: #{sms_send_initiated.message_type}, Request ID: #{request_id}, Position: #{request.meta_position} -> #{position}" }
         end
 
         stream_name = stream_name(request_id, 'twilioLib')
@@ -117,41 +119,57 @@ module TwilioLibComponent
       handle SmsFetched do |sms_fetched|
         return unless sms_fetched.metadata.reply?
 
+        current, ignored = processed.(sms_fetched)
+        return ignored.() if current
+
         record_sms_fetched = RecordSmsFetched.follow(sms_fetched, exclude: [
           :meta_position
         ])
 
         write.reply(record_sms_fetched)
+        finished.(sms_fetched)
       end
 
       handle SmsFetchRejected do |sms_fetch_rejected|
         return unless sms_fetch_rejected.metadata.reply?
+
+        current, ignored = processed.(sms_fetch_rejected)
+        return ignored.() if current
 
         record_sms_fetch_rejected = RecordSmsFetchRejected.follow(sms_fetch_rejected, exclude: [
           :meta_position
         ])
 
         write.reply(record_sms_fetch_rejected)
+        finished.(sms_fetch_rejected)
       end
 
       handle SmsSent do |sms_sent|
         return unless sms_sent.metadata.reply?
+
+        current, ignored = processed.(sms_sent)
+        return ignored.() if current
 
         record_sms_sent = RecordSmsSent.follow(sms_sent, exclude: [
           :meta_position
         ])
 
         write.reply(record_sms_sent)
+        finished.(sms_sent)
       end
 
       handle SmsSendRejected do |sms_send_rejected|
         return unless sms_send_rejected.metadata.reply?
+
+        current, ignored = processed.(sms_send_rejected)
+        return ignored.() if current
 
         record_sms_send_rejected = RecordSmsSendRejected.follow(sms_send_rejected, exclude: [
           :meta_position
         ])
 
         write.reply(record_sms_send_rejected)
+        finished.(sms_send_rejected)
       end
     end
   end

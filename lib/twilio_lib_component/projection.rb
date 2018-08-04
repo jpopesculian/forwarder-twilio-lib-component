@@ -50,5 +50,10 @@ module TwilioLibComponent
       request.id = sms_send_initiated.request_id
       request.start_time = Time.parse(sms_send_initiated.processed_time)
     end
+
+    apply RequestFinished do |request_finished|
+      request.id = request_finished.request_id
+      request.meta_position = request_finished.meta_position
+    end
   end
 end

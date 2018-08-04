@@ -9,6 +9,7 @@ require 'twilio_lib_component/messages/events/sms_fetch_rejected'
 require 'twilio_lib_component/messages/events/sms_send_initiated'
 require 'twilio_lib_component/messages/events/sms_sent'
 require 'twilio_lib_component/messages/events/sms_send_rejected'
+require 'twilio_lib_component/messages/events/request_finished'
 
 require 'twilio_lib_component/messages/replies/record_sms_fetched'
 require 'twilio_lib_component/messages/replies/record_sms_fetch_rejected'
